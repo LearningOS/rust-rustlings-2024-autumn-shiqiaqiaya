@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,14 +68,44 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(mut list_a:LinkedList<T>, mut list_b:LinkedList<T>) -> Self
+    where T: Ord,
 	{
 		//TODO
-		Self {
+        let mut res = Self {
             length: 0,
             start: None,
             end: None,
+        };
+    
+        while let (Some(a_ptr), Some(b_ptr)) = (list_a.start, list_b.start) {
+            let a_val = unsafe { &(*a_ptr.as_ptr()).val };
+            let b_val = unsafe { &(*b_ptr.as_ptr()).val };
+    
+            if a_val < b_val {
+                let node_ptr = list_a.start.take();
+                list_a.start = unsafe { (*node_ptr.unwrap().as_ptr()).next };
+                res.add(unsafe { Box::from_raw(node_ptr.unwrap().as_ptr()).val });
+            } else {
+                let node_ptr = list_b.start.take();
+                list_b.start = unsafe { (*node_ptr.unwrap().as_ptr()).next };
+                res.add(unsafe { Box::from_raw(node_ptr.unwrap().as_ptr()).val });
+            }
         }
+    
+        while let Some(node) = list_a.start {
+            let node_ptr = list_a.start.take();
+            list_a.start = unsafe { (*node_ptr.unwrap().as_ptr()).next };
+            res.add(unsafe { Box::from_raw(node_ptr.unwrap().as_ptr()).val });
+        }
+    
+        while let Some(node) = list_b.start {
+            let node_ptr = list_b.start.take();
+            list_b.start = unsafe { (*node_ptr.unwrap().as_ptr()).next };
+            res.add(unsafe { Box::from_raw(node_ptr.unwrap().as_ptr()).val });
+        }
+    
+        res
 	}
 }
 
